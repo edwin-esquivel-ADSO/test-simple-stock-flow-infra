@@ -1,0 +1,75 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.4
+    container_name: stockflow-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootsecret
+      MYSQL_DATABASE: stockflow
+      MYSQL_USER: stockflow
+      MYSQL_PASSWORD: secret
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u stockflow -psecret || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - stockflow-network
+
+  api:
+    build:
+      context: ../test-simple-stock-flow-api
+      dockerfile: Dockerfile
+    container_name: stockflow-api
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      APP_NAME: SimpleStockFlow
+      APP_ENV: production
+      APP_DEBUG: "false"
+      APP_KEY: base64:d1R45m6qF8b2v9P3x1z7k0L4y8j2m6qF8b2v9P3x1z4=
+      APP_URL: http://localhost:8000
+      DB_CONNECTION: mysql
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: stockflow
+      DB_USERNAME: stockflow
+      DB_PASSWORD: secret
+      JWT_SIGNING_KEY: simple-stock-flow-jwt-super-secret-key-minimum-32-bytes
+      ADMIN_USERNAME: admin
+      ADMIN_PASSWORD: Admin123456*
+    ports:
+      - "8000:8000"
+    volumes:
+      - api_storage:/var/www/storage/app/public
+    networks:
+      - stockflow-network
+
+  app:
+    build:
+      context: ../test-simple-stock-flow-app
+      dockerfile: Dockerfile
+    container_name: stockflow-app
+    restart: always
+    depends_on:
+      - api
+    ports:
+      - "8080:80"
+    networks:
+      - stockflow-network
+
+volumes:
+  db_data:
+  api_storage:
+
+networks:
+  stockflow-network:
+    driver: bridge
