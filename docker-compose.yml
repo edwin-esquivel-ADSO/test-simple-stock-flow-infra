@@ -35,17 +35,17 @@ services:
       APP_NAME: SimpleStockFlow
       APP_ENV: production
       APP_DEBUG: "false"
-      APP_KEY: base64:d1R45m6qF8b2v9P3x1z7k0L4y8j2m6qF8b2v9P3x1z4=
+      APP_KEY: ${APP_KEY}
       APP_URL: http://localhost:8000
       DB_CONNECTION: mysql
       DB_HOST: db
       DB_PORT: 3306
-      DB_DATABASE: stockflow
-      DB_USERNAME: stockflow
-      DB_PASSWORD: secret
-      JWT_SIGNING_KEY: simple-stock-flow-jwt-super-secret-key-minimum-32-bytes
-      ADMIN_USERNAME: admin
-      ADMIN_PASSWORD: Admin123456*
+      DB_DATABASE: ${MYSQL_DATABASE:-stockflow}
+      DB_USERNAME: ${MYSQL_USER:-stockflow}
+      DB_PASSWORD: ${MYSQL_PASSWORD:-secret}
+      JWT_SIGNING_KEY: ${JWT_SIGNING_KEY}
+      ADMIN_USERNAME: ${ADMIN_USERNAME:-admin}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-Admin123456*}
     ports:
       - "8000:8000"
     volumes:
